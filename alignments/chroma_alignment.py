@@ -1,3 +1,52 @@
+"""
+Score-to-Audio alignment using pitch-based chroma features.
+
+This module implements an a alignment pipeline based on
+pitch-derived chroma features. 
+
+Overview
+--------
+The audio signal is converted into pitch-based features using
+time-frequency analysis. These pitch features are projected into
+chroma representations (12 pitch classes) and quantized to improve
+robustness. The resulting chroma features are then aligned with
+score-derived chroma features using multi-resolution Dynamic Time
+Warping (MrMsDTW).
+
+Main steps
+----------
+1. Load audio recording
+2. Estimate global tuning deviation
+3. Extract pitch features from audio
+4. Convert pitch features into chroma representation
+5. Quantize chroma features
+6. Extract chroma features from symbolic annotations
+7. Estimate optimal chroma shift between audio and score
+8. Perform alignment using MrMsDTW (SyncToolbox)
+9. Warp annotation timestamps according to the alignment path
+10. Reinsert rests and adjust silence segments
+11. Export aligned annotations as CSV files
+
+Feature Description
+-------------------
+- Chroma features: 12-dimensional pitch class representation derived
+  from pitch features, robust to octave differences.
+- Quantized chroma: discretized chroma features used for alignment.
+
+Dependencies
+------------
+- numpy
+- pandas
+- librosa
+- scipy
+- synctoolbox
+- local utilities from `common_variables_functions`
+
+Data Requirements
+-----------------
+- Audio recordings (e.g.  `.m4a`)
+- Symbolic annotations in unfolded CSV format
+"""
 from common_variables_functions import *
 import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))

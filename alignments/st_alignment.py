@@ -1,6 +1,57 @@
-#!/usr/bin/env python
-# coding: utf-8
+"""
+Score-to-audio alignment using spectral templates.
 
+This module implements an alignment pipeline based on
+spectral template matching and chroma features. It is designed for
+monophonic recordings (e.g., solo flute) and symbolic scores provided
+as time-aligned annotations.
+
+Overview
+--------
+The method estimates pitch likelihoods directly from the audio signal
+using discrete harmonic templates. These templates model the spectral
+structure of musical notes and are matched against a magnitude
+spectrogram to produce a time-pitch representation.
+
+This representation is then reduced to chroma features (pitch classes),
+which are aligned with score-derived chroma features using
+multi-resolution Dynamic Time Warping (MrMsDTW).
+
+Main steps
+----------
+1. Load audio and compute a magnitude spectrogram (STFT)
+2. Generate harmonic templates for each MIDI pitch
+3. Compute a pitch likelihood matrix via template matching
+4. Aggregate pitch bins into 12-dimensional chroma features
+5. Extract chroma features from symbolic score annotations
+6. Estimate optimal chroma shift between audio and score
+7. Perform alignment using MrMsDTW (SyncToolbox)
+8. Warp annotation timestamps according to the alignment path
+9. Reinsert rests and adjust silence segments
+10. Export aligned annotations as CSV files
+
+Methodological Notes
+-------------------
+- Pitch range is restricted to MIDI [24, 96) (6 octaves).
+- Harmonic templates are constructed with a power-law decay over partials.
+- Likelihoods are computed via dot product between templates and spectra.
+- Chroma features provide robustness to octave errors.
+- The approach is fully deterministic (no machine learning involved).
+
+Dependencies
+------------
+- numpy
+- pandas
+- librosa
+- scipy
+- synctoolbox
+- local utilities from `common_variables_functions`
+
+Data Requirements
+-----------------
+- Audio recordings (e.g. `.m4a`)
+- Symbolic annotations in unfolded CSV format
+"""
 from common_variables_functions import *
 import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -88,10 +139,6 @@ def generate_note_likelihood_matrix(performer: str, y: np.ndarray, sr: int, S: n
         and each column corresponds to a time frame in the audio.
         Each element contains the likelihood score between the note template
         and the audio spectrum at that frame.
-
-    Notes:
-        - The likelihood is computed as the dot product between the harmonic template
-          and the spectral vector at each time frame.
     """
     midi_start, midi_end = 24, 96
     n_pitches = midi_end - midi_start 
