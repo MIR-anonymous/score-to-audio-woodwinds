@@ -24,9 +24,9 @@
 
 ### Unshifted and representation-shifted alignments
 
-- [📁Chroma-based](ouputs/chroma/)
+- [📁Chroma-based](outputs/chroma/)
 - [📁Spectral Template-based](outputs/st/)
-- [📁Neural MPE-based](ouputs/neural/)
+- [📁Neural MPE-based](outputs/neural/)
 
 ## 💻Code
 
